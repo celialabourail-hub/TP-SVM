@@ -10,18 +10,10 @@ geometry: top=1.5cm, bottom=1.5cm, left=2cm, right=2cm
 header-includes:
 - \usepackage{graphicx}
 - \usepackage{fancyhdr}
-- \usepackage{wallpaper}
-- \usepackage{caption}
-- \usepackage{subcaption}
 execute:
     echo: false
----
-
-
-\begin{titlepage}
 \centering
 
-\begin{minipage}[c]{6cm}
     \centering
     \includegraphics[width=\linewidth]{../figures/Logo.png}
 \end{minipage}

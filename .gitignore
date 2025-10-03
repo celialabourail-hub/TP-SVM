@@ -205,3 +205,35 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Fichiers/dossiers à ignorer par Git
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+.env
+.venv
+.envrc
+*.sqlite3
+*.log
+*.bak
+*.tmp
+*.swp
+*.swo
+*.~
+# Fichiers Quarto/LaTeX temporaires
+*.aux
+*.out
+*.toc
+*.log
+*.pdfsync
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+# Résultats générés
+results/
+# Fichiers PDF générés (optionnel)
+*.pdf
