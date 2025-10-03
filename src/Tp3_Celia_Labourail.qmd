@@ -13,6 +13,8 @@ header-includes:
 - \usepackage{wallpaper}
 - \usepackage{caption}
 - \usepackage{subcaption}
+execute:
+    echo: false
 ---
 
 
@@ -21,12 +23,12 @@ header-includes:
 
 \begin{minipage}[c]{6cm}
     \centering
-    \includegraphics[width=\linewidth]{Logo.png}
+    \includegraphics[width=\linewidth]{../figures/Logo.png}
 \end{minipage}
 \hspace{1cm}
 \begin{minipage}[c]{6cm}
     \centering
-    \includegraphics[width=\linewidth]{ssd_logo_couleur_noir_variante_biostats.png}
+    \includegraphics[width=\linewidth]{../figures/ssd_logo_couleur_noir_variante_biostats.png}
 \end{minipage}
 
 \vspace{0.5cm}
@@ -63,7 +65,28 @@ B.Bensaid
 
 \end{titlepage}
 
-# Introduction
+\section*{Introduction}
+
+L'objectif de ce TP est d'explorer les \textbf{Machines à Vecteurs de Support (SVM)} sur différents jeux de données afin de comparer les performances selon le noyau utilisé, l'influence du bruit et l'effet d'une réduction de dimension (PCA).  
+
+Les SVM sont efficaces pour la classification supervisée, même lorsque les données ne sont pas linéairement séparables, grâce aux noyaux non linéaires. Ce TP comprend : 
+\begin{itemize}
+    \item Étude sur un jeu de données synthétique (2 gaussiennes),
+    \item Étude sur le jeu de données Iris,
+    \item Évaluation de l'effet de variables de nuisance,
+    \item Réduction de dimension avec PCA,
+    \item Une application sur la reconnaissance de visages.
+\end{itemize}
+
+\section*{Méthodologie}
+
+\begin{itemize}
+    \item Standardisation des données avant entraînement.
+    \item SVM entraînés avec différents noyaux : linéaire et polynomial.
+    \item Validation croisée pour sélectionner le meilleur paramètre de régularisation \(C\) et d'autres hyperparamètres.
+    \item Évaluation par score sur ensemble d'entraînement et de test.
+    \item Visualisation des frontières de décision et projections PCA pour interprétation.
+\end{itemize}
 
 ```{python}
 import numpy as np
@@ -108,6 +131,8 @@ plt.figure(1, figsize=(15, 5))
 plt.title('First data set')
 plot_2d(X1, y1)
 
+
+
 X_train = X1[::2]
 Y_train = y1[::2].astype(int)
 X_test = X1[1::2]
@@ -138,6 +163,7 @@ clf2 = SVC()
 clf_grid = GridSearchCV(clf2, parameters, n_jobs=1)
 clf_grid.fit(X_train, Y_train)
 
+
 # check your score
 print(clf_grid.best_params_)
 print('Score : %s' % clf_grid.score(X_test, Y_test))
@@ -151,10 +177,23 @@ plt.figure()
 frontiere(f_grid, X_train, Y_train, w=None, step=50, alpha_choice=1)
 
 ```
+
+section*{Résultats}
+
+\subsection*{1. Jeu de données synthétique (2 gaussiennes)}
+
+\begin{itemize}
+    \item Score SVM linéaire : \(0.905\)  
+    \item Visualisation de la frontière de décision : séparation correcte des deux classes.
+\end{itemize}
+
+\textbf{Interprétation :} Le SVM linéaire sépare correctement les deux distributions. Même un modèle simple peut être efficace sur des données bien séparées.
 ```{python}
 ###############################################################################
 #               Iris Dataset
 ###############################################################################
+
+
 
 iris = datasets.load_iris()
 X = iris.data
@@ -175,6 +214,8 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 ```{python}
 #Q1 Linear kernel
 
+
+
 # fit the model
 parameters = {'kernel': ['linear'], 'C': list(np.logspace(-3, 3, 200))}
 
@@ -191,11 +232,15 @@ print('Generalization score for linear kernel: %s, %s' %
       (clf_linear.score(X_train, y_train),
        clf_linear.score(X_test, y_test)))
 
+
+
 ```
 
 
 ```{python}
 # Q2 polynomial kernel
+
+
 Cs = list(np.logspace(-3, 3, 5))
 gammas = 10. ** np.arange(1, 2)
 degrees = np.r_[1, 2, 3]
@@ -209,6 +254,7 @@ print(clf_poly.best_params_)
 print('Generalization score for polynomial kernel: %s, %s' %
       (clf_poly.score(X_train, y_train),
        clf_poly.score(X_test, y_test)))
+
 
 ```
 
@@ -238,9 +284,18 @@ frontiere(f_poly, X, y)
 plt.title("polynomial kernel")
 plt.tight_layout()
 plt.draw()
+
+
 ```
 
+\subsection*{2. Jeu de données Iris}
 
+\begin{itemize}
+    \item Noyau linéaire : score raisonabe proche de 1   
+    \item Noyau polynomial : score entraînement et test similaire, paramètres optimaux choisis par validation croisée. polynome de degrés 1 
+\end{itemize}
+
+\textbf{Interprétation :} Le noyau linéaire fonctionne très bien sur Iris, mais le noyau polynomial peut légèrement améliorer la performance sur des classes plus complexes si degrés supérieur a 1 . La généralisation reste satisfaisante.
 ```{python}
 ###############################################################################
 #               SVM GUI
@@ -252,11 +307,26 @@ plt.draw()
 
 
 ```
+
+![](../figures/svm_gui_capture.png)
+*Figure : Capture d'écran de l'interface graphique SVM (Scikit-learn Libsvm GUI)*
+D
+ans l’exemple réalisé avec le SVM GUI, le jeu de données est fortement déséquilibré et le paramètre de régularisation C
+C est petit. On observe alors que le modèle a tendance à favoriser la classe majoritaire, au détriment de la classe minoritaire. Le score globalS peut paraître correct, mais il masque en réalité une mauvaise classification des échantillons minoritaires.
+
+Si l’on diminue encore C
+C, le SVM devient plus souple, la marge est pluslarge et le modèle tolère davantage les erreurs sur l’ensemble d’entraînement. Cela augmente encore le risque de sous‑apprentissage, accentuant la tendance à prédire principalement la classe majoritaire.
+
+En résumé, sur un jeu déséquilibré, un C
+
+C trop petit rend le modèle trop généraliste, ce qui réduit sa capacité à détecter correctement la classe minoritaire. Il est donc essentiel de choisir un C
+C adapté ou d’utiliser des technique de rééquilibrage pour obtenir une classification fiable.
 ```{python}
 #%%
 ###############################################################################
 #               Face Recognition Task
 ###############################################################################
+
 """
 The dataset used in this example is a preprocessed excerpt
 of the "Labeled Faces in the Wild", aka LFW_:
@@ -294,6 +364,8 @@ y = np.r_[np.zeros(np.sum(idx0)), np.ones(np.sum(idx1))].astype(int)
 # plot a sample set of the data
 plot_gallery(images, np.arange(12))
 plt.show()
+
+
 ```
 
 
@@ -310,6 +382,8 @@ X = (np.mean(images, axis=3)).reshape(n_samples, -1)
 # Scale features
 X -= np.mean(X, axis=0)
 X /= np.std(X, axis=0)
+
+
 
 ```
 ```{python}
@@ -329,6 +403,8 @@ images_train, images_test = images[
 
 ####################################################################
 # Quantitative evaluation of the model quality on the test set
+
+
 ```
 ```{python}
 # Q4
@@ -357,6 +433,8 @@ plt.tight_layout()
 plt.show()
 print("Best score: {}".format(np.max(scores)))
 
+
+
 print("Predicting the people names on the testing set")
 t0 = time()
 
@@ -368,6 +446,8 @@ print("done in %0.3fs" % (time() - t0))
 # The chance level is the accuracy that will be reached when constantly predicting the majority class.
 print("Chance level : %s" % max(np.mean(y), 1. - np.mean(y)))
 print("Accuracy : %s" % clf.score(X_test, y_test))
+
+
 
 ```
 
@@ -387,7 +467,23 @@ plt.show()
 plt.figure()
 plt.imshow(np.reshape(clf.coef_, (h, w)))
 plt.show()
+
+
 ```
+
+\subsection*{3. Reconnaissance de visages}
+
+\begin{itemize}
+    \item Dataset : LFW, deux personnes sélectionnées.
+    \item Features : moyenne des couleurs par pixel.
+    \item SVM linéaire : score test ~\(0.95\)
+\end{itemize}
+
+\textbf{Interprétation :} Les SVM linéaires peuvent reconnaître efficacement les visages lorsqu’ils sont correctement prétraités. Les coefficients du SVM mettent en évidence les zones discriminantes du visage.
+
+
+
+
 ```{python}
 # Q5
 
@@ -406,9 +502,12 @@ def run_svm_cv(_X, _y):
           (_clf_linear.score(_X_train, _y_train), _clf_linear.score(_X_test, _y_test)))
 
 
+
+
 print("Score sans variable de nuisance")
 # TODO ... use run_svm_cv on data
 run_svm_cv(X, y)
+
 
 
 print("Score avec variable de nuisance")
@@ -427,18 +526,31 @@ X_noisy = X_noisy[:, cols]
 
 # TODO ... use run_svm_cv on noisy data
 run_svm_cv(X_noisy, y)
+
+
 ```
+
+\subsection*{4. Effet des variables de nuisance}
+
+\begin{itemize}
+    \item Score test SVM linéaire avec variables de nuisance : \(0.8947\)  
+    \item Score sans variables de nuisance : \(0.9158\)
+\end{itemize}
+
+\textbf{Interprétation :} L’ajout de variables aléatoires diminue légèrement les performances. Le SVM reste robuste grâce à la régularisation.
+
+
 ```{python}
 # Q6
 print("Score apres reduction de dimension")
 
-n_components = 5  # jouer avec ce parametre
+n_components = 10  # jouer avec ce parametre
 pca = PCA(n_components=n_components, svd_solver='randomized').fit(X_noisy)
 
 # TODO ... projection des données et appel de run_svm_cv
 X_pca = pca.transform(X_noisy)  # projeter les données sur les n_components premiers axes          
 score = run_svm_cv(X_pca, y)   # exécuter le SVM sur les données réduites
-print(f"Score après réduction de dimension : {score:.4f}")
+
 
 # %%
 plt.figure(figsize=(8,6))
@@ -457,3 +569,27 @@ plt.title("PCA - Variance expliquée")
 plt.grid(True)
 plt.show()
 ```
+\subsection*{5. Réduction de dimension (PCA)}
+
+\begin{itemize}
+    \item Projection des données sur les deux premières composantes principales.
+    \item Score après PCA (avec \(n\_components=5\)) : ~\(0.91\)
+\end{itemize}
+
+\textbf{Interprétation :} La PCA permet de conserver la structure des données tout en réduisant la dimensionnalité. Utile pour accélérer l’apprentissage sur des datasets volumineux ou bruités.
+
+
+
+\section*{Conclusion}
+
+\begin{itemize}
+    \item Les SVM sont très performants pour la classification supervisée sur des jeux de données simples et moyennement complexes.
+    \item Le choix du noyau et des hyperparamètres influence fortement la performance.
+    \item Les SVM sont robustes face aux variables de nuisance grâce à la régularisation.
+    \item La réduction de dimension via PCA est efficace pour accélérer l’apprentissage tout en conservant l’information pertinente.
+    \item Les SVM peuvent être appliqués à des tâches réelles, comme la reconnaissance faciale, avec de bons résultats.
+\end{itemize}
+
+On remarque que dans le code fourni, certaines évaluations du SVM utilisent directement les données d’entraînement pour calculer la performance, par exemple lors du calcul des scores avec clf_linear.score(X_train, y_train). Cela signifie que le modèle "connaît" déjà ces données, ce qui peut conduire à des scores optimistes.
+
+Idéalement, l’évaluation devrait se faire uniquement sur des données de test séparées qui n’ont pas été utilisées pour l’entraînement, afin d’obtenir une estimation réaliste de la performance du modèle sur de nouvelles données.
