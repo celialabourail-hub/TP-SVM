@@ -1,0 +1,4 @@
+# Listez ici les dépendances Python nécessaires, par exemple :
+scikit-learn
+matplotlib
+pandas
